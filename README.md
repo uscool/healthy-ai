@@ -202,7 +202,7 @@ Healthy-AI/
 
 ---
 
-# Future Improvements
+# RoadMap (Future Improvements)
 
 * OCR support for scanned PDFs
 * Medical report analysis

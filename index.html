@@ -501,6 +501,9 @@
     .report-section details { display: none !important; }
     .report-section table { border: 1px solid #ddd; }
     .report-section th, .report-section td { border-bottom: 1px solid #ddd; }
+    canvas { max-width: 100%; height: auto; page-break-inside: avoid; break-inside: avoid; }
+    div[style*="grid-template-columns"] { display: block !important; }
+    div[style*="grid-template-columns"] > div { margin-bottom: 2rem; page-break-inside: avoid; break-inside: avoid; }
   }
 </style>
 </head>
@@ -651,6 +654,7 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<script src="charts.js"></script>
 <script>
 /* ─────────────────────────────────────────
    CONFIG — change to your backend URL
@@ -880,17 +884,24 @@ function renderReport() {
   content.classList.remove("hidden");
 
   let mkd = "";
+  let chartsHtml = "";
+  let reportData = "";
+  
   if (state.finalReport) {
     if (state.activeTab === "summary") {
       mkd = `# Diagnosis & Findings\n\n${state.finalReport.summary || "No data"}\n\n## General Advice\n${state.finalReport.general_advice || ""}\n\n## Important Notes\n${state.finalReport.important || ""}`;
+      reportData = state.finalReport.summary || "";
     } else if (state.activeTab === "fitness") {
       mkd = `# Weekly Fitness Routine\n\n${state.finalReport.fitness || "No data"}`;
+      reportData = state.finalReport.fitness || "";
     } else {
       mkd = `# Weekly Diet Plan\n\n${state.finalReport.diet || "No data"}`;
+      reportData = state.finalReport.diet || "";
     }
   } else if (state.initialSummary) {
     if (state.activeTab === "summary") {
       mkd = `# Preliminary Diagnosis & Findings\n\n*This summary is dynamically updating based on your answers...*\n\n---\n\n${state.initialSummary}`;
+      reportData = state.initialSummary;
     } else {
       mkd = `*Pending completion of the Q&A loop...*`;
     }
@@ -898,6 +909,14 @@ function renderReport() {
   
   // Use marked.js to convert Markdown to HTML
   content.innerHTML = `<div class="report-section" style="font-size:14px;line-height:1.6;">${marked.parse(mkd)}</div>`;
+  
+  // Add charts for summary tab
+  if (state.activeTab === "summary" && reportData && typeof MedChartsEngine !== 'undefined') {
+    const chartsContainer = document.createElement('div');
+    chartsContainer.style.cssText = 'margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #d6d2c8;';
+    MedChartsEngine.renderCharts(chartsContainer, reportData);
+    content.appendChild(chartsContainer);
+  }
 }
 
 /* ─────────────────────────────────────────
@@ -916,8 +935,43 @@ function buildPrintView() {
   const dBody = document.getElementById("printDietBody");
 
   if (state.finalReport) {
-    fBody.innerHTML = `<div class="report-section">${marked.parse(state.finalReport.fitness || "No fitness data.")}</div>`;
-    dBody.innerHTML = `<div class="report-section">${marked.parse(state.finalReport.diet || "No diet data.")}</div>`;
+    // Fitness section with charts
+    const fitnessHtml = `<div class="report-section">${marked.parse(state.finalReport.fitness || "No fitness data.")}</div>`;
+    fBody.innerHTML = fitnessHtml;
+    
+    // Add charts to fitness report
+    if (typeof MedChartsEngine !== 'undefined') {
+      const fitnessChartsContainer = document.createElement('div');
+      fitnessChartsContainer.style.cssText = 'margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #d6d2c8;';
+      const adherenceChartDiv = document.createElement('div');
+      adherenceChartDiv.style.cssText = 'border: 1px solid #d6d2c8; border-radius: 8px; padding: 1.5rem; background: #faf9f6;';
+      const adherenceTitle = document.createElement('h3');
+      adherenceTitle.textContent = '✅ Fitness Plan Adherence';
+      adherenceTitle.style.cssText = 'margin-bottom: 1rem; font-size: 14px; color: #1a1916;';
+      adherenceChartDiv.appendChild(adherenceTitle);
+      MedChartsEngine.createAdherenceBarChart(adherenceChartDiv, {'Daily Exercise': 65, 'Strength Training': 50, 'Cardio': 60, 'Flexibility': 55, 'Recovery': 70});
+      fitnessChartsContainer.appendChild(adherenceChartDiv);
+      fBody.appendChild(fitnessChartsContainer);
+    }
+    
+    // Diet section with charts
+    const dietHtml = `<div class="report-section">${marked.parse(state.finalReport.diet || "No diet data.")}</div>`;
+    dBody.innerHTML = dietHtml;
+    
+    // Add charts to diet report
+    if (typeof MedChartsEngine !== 'undefined') {
+      const dietChartsContainer = document.createElement('div');
+      dietChartsContainer.style.cssText = 'margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #d6d2c8;';
+      const nutritionChartDiv = document.createElement('div');
+      nutritionChartDiv.style.cssText = 'border: 1px solid #d6d2c8; border-radius: 8px; padding: 1.5rem; background: #faf9f6; text-align: center;';
+      const nutritionTitle = document.createElement('h3');
+      nutritionTitle.textContent = '🥗 Recommended Nutrition Breakdown';
+      nutritionTitle.style.cssText = 'margin-bottom: 1rem; font-size: 14px; color: #1a1916;';
+      nutritionChartDiv.appendChild(nutritionTitle);
+      MedChartsEngine.createNutritionPieChart(nutritionChartDiv, {'Proteins': 30, 'Carbs': 45, 'Fats': 20, 'Fiber': 5});
+      dietChartsContainer.appendChild(nutritionChartDiv);
+      dBody.appendChild(dietChartsContainer);
+    }
   } else {
     fBody.innerHTML = "<p>No report generated.</p>";
     dBody.innerHTML = "<p>No report generated.</p>";

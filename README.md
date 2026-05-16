@@ -211,14 +211,3 @@ Healthy-AI/
 * Multi-model LLM support (Gemma, Llama)
 
 ---
-
-This version feels:
-
-* more startup/professional
-* easier for judges/recruiters to scan
-* cleaner on GitHub
-* less intimidating technically
-* more “production-ready”
-
-Biggest improvement: tables + spacing + reducing wall-of-text density.
-

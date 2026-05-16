@@ -7,22 +7,7 @@
 
 A healthcare-focused Retrieval-Augmented Generation (RAG) system that processes nutrition and health textbooks to generate personalized diet plans using semantic search and AI.
 
-<img width="1280" height="699" alt="image" src="https://github.com/user-attachments/assets/0b32bf94-2e40-44cf-9908-4447dc9b0796" />
-
-Your README has good content, but the issue is that everything is packed together with no visual hierarchy. It reads like raw notes instead of a polished GitHub project.
-
-You should:
-
-* reduce repetition
-* shorten paragraphs
-* use sections properly
-* add spacing
-* use tables where useful
-* make it scannable in 15 seconds
-
-Here’s a much cleaner structure/style:
-
----
+<img width="1096" height="683" alt="image" src="https://github.com/user-attachments/assets/bbd925fe-2941-41e5-80a7-5f670233a3b7" />
 
 # Healthy-AI
 

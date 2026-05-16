@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -232,7 +233,7 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 2rem 2.25rem;
+    padding: 2.5rem 3rem;
     box-shadow: var(--shadow);
   }
   .report-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
@@ -240,10 +241,27 @@
   .report-title { font-size: 20px; font-weight: 700; }
   .report-badge { font-size: 10px; background: var(--accent-light); color: var(--accent); border: 1px solid #b8d498; border-radius: 20px; padding: 3px 10px; font-family: var(--mono); white-space: nowrap; }
 
-  .report-section { margin-bottom: 1.5rem; }
-  .report-section-title { font-size: 11px; font-family: var(--mono); letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px; }
+  .report-section { margin-bottom: 2.5rem; }
+  .report-section-title { font-size: 11px; font-family: var(--mono); letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
   .report-section-title::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
-  .report-section p { font-size: 14px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .report-section h1 { font-size: 26px; font-family: var(--serif); font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary); }
+  .report-section h2 { font-size: 18px; font-weight: 600; margin-top: 2.5rem; margin-bottom: 1.25rem; color: var(--text-primary); border-bottom: 1px solid var(--border-strong); padding-bottom: 0.5rem; }
+  .report-section h3 { font-size: 15px; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: var(--text-primary); }
+  .report-section p { font-size: 14.5px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 1.25rem; }
+  .report-section ul, .report-section ol { margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-secondary); line-height: 1.8; }
+  .report-section li { margin-bottom: 0.5rem; font-size: 14.5px; }
+  .report-section li::marker { color: var(--accent-mid); font-weight: 600; }
+  .report-section strong { color: var(--text-primary); font-weight: 600; }
+  
+  .report-section table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 13px; text-align: left; }
+  .report-section th { background: var(--bg); padding: 10px 12px; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-strong); }
+  .report-section td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+  .report-section tr:last-child td { border-bottom: none; }
+  
+  .report-section details { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-top: 2rem; }
+  .report-section summary { font-weight: 600; color: var(--text-primary); cursor: pointer; outline: none; }
+  .report-section summary:hover { color: var(--accent-mid); }
+  .report-section details ul { margin-top: 1rem; margin-bottom: 0; }
 
   .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 0.75rem; }
   .metric-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem; text-align: center; }
@@ -384,12 +402,7 @@
   .doc-sheet-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
   .doc-sheet-sub { font-size: 10px; font-family: var(--mono); letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 4px; }
   .doc-sheet-title { font-size: 18px; font-weight: 700; }
-  .doc-sheet-body { font-size: 13px; line-height: 1.8; color: var(--text-secondary); }
-  .doc-sheet-body h4 { font-size: 11px; font-family: var(--mono); letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; margin: 1.25rem 0 0.5rem; }
-  .doc-sheet-body p { margin-bottom: 0.5rem; }
-  .doc-sheet-body ul { list-style: none; padding: 0; }
-  .doc-sheet-body ul li { padding: 3px 0; display: flex; gap: 8px; }
-  .doc-sheet-body ul li::before { content: '·'; color: var(--accent-mid); font-weight: 700; }
+  .doc-sheet-body { font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
 
   /* ─── Utilities ─── */
   .hidden { display: none !important; }
@@ -413,11 +426,80 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
+  /* ─── Question Popup ─── */
+  .question-popup {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 360px;
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 1.5rem;
+    z-index: 1000;
+    transform: translateY(150%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .question-popup.active {
+    transform: translateY(0);
+  }
+  .qp-title {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--accent-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .qp-text {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .qp-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .qp-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .qp-btn:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-mid);
+  }
+  .qp-loading {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .qp-loading.active {
+    display: flex;
+  }
+
   @media print {
-    header, .print-topbar { display: none; }
-    .docs-grid { grid-template-columns: 1fr 1fr; padding: 0; gap: 1rem; }
-    .doc-sheet { box-shadow: none; break-inside: avoid; }
-    #workspace, #printview { height: auto; }
+    body { background: #fff !important; color: #000 !important; }
+    header, .print-topbar, .toast, .question-popup { display: none !important; }
+    .docs-grid { display: block; padding: 0; }
+    .doc-sheet { box-shadow: none; border: none; padding: 0 0 2rem 0; margin-bottom: 3rem; break-inside: avoid; border-bottom: 2px dashed #eee; }
+    .doc-sheet:last-child { border-bottom: none; }
+    #workspace { display: none !important; }
+    #printview { display: flex !important; height: auto; }
+    .report-section details { display: none !important; }
+    .report-section table { border: 1px solid #ddd; }
+    .report-section th, .report-section td { border-bottom: 1px solid #ddd; }
   }
 </style>
 </head>
@@ -450,11 +532,6 @@
     </div>
     <div class="panel-body">
 
-      <div class="info-card" id="patientInfoCard">
-        <div class="info-card-label">Extracted Patient Data</div>
-        <div id="patientInfoRows" class="info-empty">Upload a report to extract patient information.</div>
-      </div>
-
       <div id="fileSection">
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple />
@@ -463,6 +540,11 @@
           <div class="upload-hint">PDF, JPEG, PNG, DOC · max 20MB</div>
         </div>
         <div id="fileBadges" class="file-badges hidden" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="info-card" id="patientInfoCard">
+        <div class="info-card-label">Extracted Patient Data</div>
+        <div id="patientInfoRows" class="info-empty">Upload a report to extract patient information.</div>
       </div>
 
       <div id="processSection">
@@ -554,6 +636,17 @@
   </div>
 </div>
 
+<!-- Question Popup -->
+<div class="question-popup" id="questionPopup">
+  <div class="qp-title"><i class="fa fa-robot"></i> Follow-up Question</div>
+  <div class="qp-text" id="qpText">Loading question...</div>
+  <div class="qp-options" id="qpOptions"></div>
+  <div class="qp-loading" id="qpLoading">
+    <div class="spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></div>
+    <span>Thinking...</span>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -561,21 +654,18 @@
 /* ─────────────────────────────────────────
    CONFIG — change to your backend URL
 ───────────────────────────────────────── */
-const API_BASE = "http://localhost:8000";   // your FastAPI / Flask backend
+const API_BASE = "http://localhost:8000/api";   // new Flask backend
 
 /* ─────────────────────────────────────────
    STATE
 ───────────────────────────────────────── */
 let state = {
+  sessionId: null,
   files: [],
   fileBase64: [],
-  patientInfo: {},
-  summaryReport: null,
-  fitnessReport: null,
-  dietReport: null,
-  questions: [],
-  answers: {},
+  finalReport: null,
   activeTab: "summary",
+  currentQuestion: null
 };
 
 /* ─────────────────────────────────────────
@@ -589,16 +679,16 @@ uploadZone.addEventListener("dragleave", () => uploadZone.classList.remove("drag
 uploadZone.addEventListener("drop", e => {
   e.preventDefault(); uploadZone.classList.remove("drag-over");
   const fs = Array.from(e.dataTransfer.files || []);
-  if (fs.length) setFiles(fs);
+  if (fs.length) setFiles([fs[0]]); // Only 1 file for now
 });
-fileInput.addEventListener("change", () => { if (fileInput.files && fileInput.files.length) setFiles(Array.from(fileInput.files)); });
+fileInput.addEventListener("change", () => { if (fileInput.files && fileInput.files.length) setFiles([fileInput.files[0]]); });
 
 function setFiles(fs) {
   state.files = fs;
   const badgesContainer = document.getElementById("fileBadges");
   badgesContainer.innerHTML = "";
   document.getElementById("analyzeBtn").disabled = false;
-  state.fileBase64 = [];
+  
   fs.forEach((f, idx) => {
     const badge = document.createElement("div");
     badge.className = "file-badge";
@@ -609,29 +699,12 @@ function setFiles(fs) {
       <button class="file-remove" onclick="removeFileAt(${idx})" title="Remove"><i class="fa fa-times"></i></button>
     `;
     badgesContainer.appendChild(badge);
-    
-    const reader = new FileReader();
-    reader.onload = e => { state.fileBase64[idx] = e.target.result.split(",")[1]; };
-    reader.readAsDataURL(f);
   });
   badgesContainer.classList.remove("hidden");
 }
 
 function removeFileAt(idx) {
-  state.files.splice(idx, 1);
-  state.fileBase64.splice(idx, 1);
-  if (state.files.length === 0) {
-    fileInput.value = "";
-    document.getElementById("fileBadges").classList.add("hidden");
-    document.getElementById("analyzeBtn").disabled = true;
-  } else {
-    setFiles(state.files);
-  }
-}
-
-function removeFile() {
   state.files = [];
-  state.fileBase64 = [];
   fileInput.value = "";
   document.getElementById("fileBadges").classList.add("hidden");
   document.getElementById("analyzeBtn").disabled = true;
@@ -658,81 +731,127 @@ function switchTab(tab) {
 
 /* ─────────────────────────────────────────
    MAIN ANALYSIS FLOW
-   ↓ calls your backend → backend calls LLM → returns JSON
 ───────────────────────────────────────── */
 async function analyzeReport() {
   if (!state.files || state.files.length === 0) return;
   showProcessing(true);
-  setStep("Sending to backend…");
+  setStep("Uploading to backend & extracting info...");
+  
+  // Clear Q-List
+  document.getElementById("questionList").innerHTML = `<div class="q-empty" id="qEmpty">Questions generated by AI will appear here...</div>`;
 
   try {
-    /* ── Step 1: Upload file to backend ── */
     const formData = new FormData();
-    // append all selected files
-    state.files.forEach((f, i) => formData.append('file' + (i>0? i : ''), f));
+    formData.append('file', state.files[0]);
 
-    const uploadResp = await fetchBackend("/upload", { method: "POST", body: formData });
-    /* Expected: { file_id: "abc123" } */
-    const { file_id } = await uploadResp.json();
-
-    setStep("Extracting patient info…");
-
-    /* ── Step 2: Extract patient info ── */
-    const infoResp = await fetchBackend("/extract-info", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ file_id })
-    });
-    /* Expected: { name, gender, age, blood_type, ... } */
-    const patientInfo = await infoResp.json();
-    state.patientInfo = patientInfo;
-    renderPatientInfo(patientInfo);
-    document.getElementById("headerPatient").textContent = patientInfo.name || "Unknown patient";
-
-    setStep("Generating reports…");
-
-    /* ── Step 3: Generate fitness + diet reports ── */
-    const reportsResp = await fetchBackend("/generate-reports", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ file_id, patient_info: patientInfo })
-    });
-    /* Expected: { fitness: { ... }, diet: { ... }, summary: { ... } } */
-    const { fitness, diet, summary } = await reportsResp.json();
-    state.summaryReport = summary;
-    state.fitnessReport = fitness;
-    state.dietReport = diet;
-    renderReport();
-
-    setStep("Generating follow-up questions…");
-
-    /* ── Step 4: Generate follow-up questions ── */
-    const qResp = await fetchBackend("/generate-questions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ file_id, patient_info: patientInfo })
-    });
-    /* Expected: [ { id, text, options: ["Yes","No","Sometimes"] }, ... ] */
-    const questions = await qResp.json();
-    state.questions = questions;
-    renderQuestions(questions);
-
+    const resp = await fetch(API_BASE + "/start", { method: "POST", body: formData });
+    const data = await resp.json();
+    
+    if (data.error) throw new Error(data.error);
+    
+    handleApiState(data);
   } catch (err) {
     console.error(err);
     showToast("Error: " + (err.message || "Backend unreachable. Check console."));
-  } finally {
     showProcessing(false);
   }
 }
 
-/* Helper — wraps fetch with base URL */
-async function fetchBackend(path, opts = {}) {
-  const resp = await fetch(API_BASE + path, opts);
-  if (!resp.ok) {
-    const msg = await resp.text();
-    throw new Error(`[${resp.status}] ${path}: ${msg}`);
+async function submitAnswer(answerVal) {
+  // Push to right panel
+  const qList = document.getElementById("questionList");
+  document.getElementById("qEmpty")?.classList.add("hidden");
+  
+  const qCard = document.createElement("div");
+  qCard.className = "q-card answered";
+  qCard.innerHTML = `
+    <div class="q-text">${state.currentQuestion.text}</div>
+    <div class="q-options">
+      <div class="q-opt selected" style="cursor:default;">
+        <input type="radio" checked disabled /> ${answerVal}
+      </div>
+    </div>
+  `;
+  qList.appendChild(qCard);
+  
+  // Show loading in popup
+  document.getElementById("qpOptions").classList.add("hidden");
+  document.getElementById("qpLoading").classList.add("active");
+  
+  try {
+    const resp = await fetch(API_BASE + "/answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: state.sessionId,
+        question_text: state.currentQuestion.text,
+        answer: answerVal
+      })
+    });
+    const data = await resp.json();
+    
+    if (data.error) throw new Error(data.error);
+    
+    handleApiState(data);
+  } catch (err) {
+    console.error(err);
+    showToast("Error submitting answer.");
+    // reset popup
+    document.getElementById("qpOptions").classList.remove("hidden");
+    document.getElementById("qpLoading").classList.remove("active");
   }
-  return resp;
+}
+
+function handleApiState(data) {
+  state.sessionId = data.session_id;
+
+  if (data.summary) {
+    state.initialSummary = data.summary;
+    if (!state.finalReport) renderReport(); // Update live summary
+  }
+  
+  if (data.status === "question") {
+    // Hide main processing if it was showing
+    showProcessing(false);
+    
+    // Show question popup
+    state.currentQuestion = data.question;
+    document.getElementById("qpText").textContent = data.question.text;
+    
+    const optsContainer = document.getElementById("qpOptions");
+    optsContainer.innerHTML = "";
+    optsContainer.classList.remove("hidden");
+    document.getElementById("qpLoading").classList.remove("active");
+    
+    data.question.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "qp-btn";
+      btn.textContent = opt;
+      btn.onclick = () => submitAnswer(opt);
+      optsContainer.appendChild(btn);
+    });
+    
+    document.getElementById("questionPopup").classList.add("active");
+  } 
+  else if (data.status === "ready") {
+    // Hide popup
+    document.getElementById("questionPopup").classList.remove("active");
+    showProcessing(false);
+    
+    // Store final report and render
+    state.finalReport = data.report;
+    renderReport();
+    
+    // Render patient info in left panel
+    if (data.patient_info) {
+      renderPatientInfo(data.patient_info);
+    }
+    
+    // Auto-open right panel if closed, or just highlight finalize btn
+    document.getElementById("finalizeBtn").disabled = false;
+    document.getElementById("finalizeBtn").textContent = "View Final Print Report";
+    showToast("Analysis Complete! Reports are ready.", 4000);
+  }
 }
 
 function setStep(txt) { document.getElementById("processingStep").textContent = txt; }
@@ -743,237 +862,64 @@ function showProcessing(on) {
 }
 
 /* ─────────────────────────────────────────
-   RENDER PATIENT INFO
-───────────────────────────────────────── */
-function renderPatientInfo(info) {
-  const fields = [
-    ["Name", info.name],
-    ["Gender", info.gender],
-    ["Age", info.age],
-    ["Blood Type", info.blood_type],
-    ["Conditions", info.conditions],
-    ["Medications", info.medications],
-  ];
-  const container = document.getElementById("patientInfoRows");
-  container.innerHTML = "";
-  container.className = "";
-  fields.forEach(([key, val]) => {
-    if (!val) return;
-    const row = document.createElement("div");
-    row.className = "info-row";
-    row.innerHTML = `<span class="info-key">${key}</span><span class="info-val">${val}</span>`;
-    container.appendChild(row);
-  });
-}
-
-/* ─────────────────────────────────────────
    RENDER REPORT (center panel)
 ───────────────────────────────────────── */
 function renderReport() {
-  let data;
-  if (state.activeTab === "summary") {
-    data = state.summaryReport;
-  } else if (state.activeTab === "fitness") {
-    data = state.fitnessReport;
-  } else {
-    data = state.dietReport;
-  }
   const empty = document.getElementById("reportEmpty");
   const content = document.getElementById("reportContent");
 
-  if (!data) { empty.classList.remove("hidden"); content.classList.add("hidden"); return; }
+  if (!state.finalReport && !state.initialSummary) { 
+    empty.classList.remove("hidden"); 
+    content.classList.add("hidden"); 
+    return; 
+  }
+  
   empty.classList.add("hidden");
   content.classList.remove("hidden");
 
-  if (state.activeTab === "fitness") {
-    content.innerHTML = renderFitnessHTML(data);
-  } else if (state.activeTab === "diet") {
-    content.innerHTML = renderDietHTML(data);
-  } else {
-    content.innerHTML = renderSummaryHTML(data);
+  let mkd = "";
+  if (state.finalReport) {
+    if (state.activeTab === "summary") {
+      mkd = `# Diagnosis & Findings\n\n${state.finalReport.summary || "No data"}\n\n## General Advice\n${state.finalReport.general_advice || ""}\n\n## Important Notes\n${state.finalReport.important || ""}`;
+    } else if (state.activeTab === "fitness") {
+      mkd = `# Weekly Fitness Routine\n\n${state.finalReport.fitness || "No data"}`;
+    } else {
+      mkd = `# Weekly Diet Plan\n\n${state.finalReport.diet || "No data"}`;
+    }
+  } else if (state.initialSummary) {
+    if (state.activeTab === "summary") {
+      mkd = `# Preliminary Diagnosis & Findings\n\n*This summary is dynamically updating based on your answers...*\n\n---\n\n${state.initialSummary}`;
+    } else {
+      mkd = `*Pending completion of the Q&A loop...*`;
+    }
   }
-}
-
-function renderFitnessHTML(d) {
-  return `<div class="report-content">
-    <div class="report-header">
-      <div>
-        <div class="report-type">FITNESS RECOMMENDATION</div>
-        <div class="report-title">${d.title || "Fitness Plan"}</div>
-      </div>
-      <div class="report-badge">AI Generated</div>
-    </div>
-    <div class="report-section">
-      <div class="report-section-title">Summary</div>
-      <p>${d.summary || "—"}</p>
-    </div>
-    ${d.metrics ? `<div class="metric-grid">
-      ${d.metrics.map(m => `<div class="metric-card"><div class="metric-val">${m.value}</div><div class="metric-lbl">${m.label}</div></div>`).join("")}
-    </div>` : ""}
-    <div class="report-section" style="margin-top:1.5rem;">
-      <div class="report-section-title">Recommended Activities</div>
-      <ul class="item-list">${(d.activities || []).map(a => `<li>${a}</li>`).join("")}</ul>
-    </div>
-    <div class="report-section">
-      <div class="report-section-title">Precautions</div>
-      <ul class="item-list">${(d.precautions || []).map(p => `<li>${p}</li>`).join("")}</ul>
-    </div>
-  </div>`;
-}
-
-function renderDietHTML(d) {
-  return `<div class="report-content">
-    <div class="report-header">
-      <div>
-        <div class="report-type">DIETARY RECOMMENDATION</div>
-        <div class="report-title">${d.title || "Diet Plan"}</div>
-      </div>
-      <div class="report-badge">AI Generated</div>
-    </div>
-    <div class="report-section">
-      <div class="report-section-title">Overview</div>
-      <p>${d.summary || "—"}</p>
-    </div>
-    <div class="report-section">
-      <div class="report-section-title">Recommended Foods</div>
-      <ul class="item-list">${(d.recommended || []).map(f => `<li>${f}</li>`).join("")}</ul>
-    </div>
-    <div class="report-section">
-      <div class="report-section-title">Foods to Avoid</div>
-      <ul class="item-list">${(d.avoid || []).map(f => `<li>${f}</li>`).join("")}</ul>
-    </div>
-    ${d.meal_plan ? `<div class="report-section">
-      <div class="report-section-title">Sample Meal Plan</div>
-      <ul class="item-list">${d.meal_plan.map(m => `<li>${m}</li>`).join("")}</ul>
-    </div>` : ""}
-  </div>`;
-}
-
-function renderSummaryHTML(d) {
-  return `<div class="report-content">
-    <div class="report-header">
-      <div>
-        <div class="report-type">HEALTH SUMMARY</div>
-        <div class="report-title">${d.title || "Summary Report"}</div>
-      </div>
-      <div class="report-badge">AI Generated</div>
-    </div>
-    <div class="report-section">
-      <div class="report-section-title">Overview</div>
-      <p>${d.summary || "—"}</p>
-    </div>
-    ${d.key_findings ? `<div class="report-section">
-      <div class="report-section-title">Key Findings</div>
-      <ul class="item-list">${(d.key_findings || []).map(f => `<li>${f}</li>`).join("")}</ul>
-    </div>` : ""}
-    ${d.recommendations ? `<div class="report-section">
-      <div class="report-section-title">General Recommendations</div>
-      <ul class="item-list">${(d.recommendations || []).map(r => `<li>${r}</li>`).join("")}</ul>
-    </div>` : ""}
-    ${d.next_steps ? `<div class="report-section">
-      <div class="report-section-title">Next Steps</div>
-      <ul class="item-list">${(d.next_steps || []).map(s => `<li>${s}</li>`).join("")}</ul>
-    </div>` : ""}
-  </div>`;
-}
-
-/* ─────────────────────────────────────────
-   RENDER QUESTIONS (right panel)
-───────────────────────────────────────── */
-function renderQuestions(questions) {
-  const list = document.getElementById("questionList");
-  const empty = document.getElementById("qEmpty");
-  if (!questions || questions.length === 0) return;
-  empty.classList.add("hidden");
-  list.innerHTML = "";
-
-  questions.forEach(q => {
-    const card = document.createElement("div");
-    card.className = "q-card";
-    card.id = "qcard-" + q.id;
-    card.innerHTML = `<div class="q-text">${q.text}</div>
-      <div class="q-options">${(q.options || []).map((opt, i) =>
-        `<label class="q-opt" id="opt-${q.id}-${i}">
-          <input type="radio" name="q-${q.id}" value="${opt}" onchange="selectAnswer('${q.id}','${opt}',${i},'${q.id}')" />
-          ${opt}
-        </label>`
-      ).join("")}</div>`;
-    list.appendChild(card);
-  });
-
-  document.getElementById("finalizeBtn").disabled = false;
-}
-
-function selectAnswer(qId, val, optIdx, cardId) {
-  state.answers[qId] = val;
-  const card = document.getElementById("qcard-" + cardId);
-  card.classList.add("answered");
-  card.querySelectorAll(".q-opt").forEach(el => el.classList.remove("selected"));
-  const opts = card.querySelectorAll(".q-opt");
-  if (opts[optIdx]) opts[optIdx].classList.add("selected");
-  checkAllAnswered();
-}
-
-function checkAllAnswered() {
-  const total = state.questions.length;
-  const answered = Object.keys(state.answers).length;
-  if (answered === total && total > 0) showToast("All questions answered — ready to finalize!");
+  
+  // Use marked.js to convert Markdown to HTML
+  content.innerHTML = `<div class="report-section" style="font-size:14px;line-height:1.6;">${marked.parse(mkd)}</div>`;
 }
 
 /* ─────────────────────────────────────────
    FINALIZE → switch to print view
-   Optionally re-call backend with answers
 ───────────────────────────────────────── */
-async function finalizeAndPrint() {
-  /* Optional: send answers back to refine reports */
-  if (Object.keys(state.answers).length > 0 && state.patientInfo) {
-    try {
-      const resp = await fetchBackend("/refine-reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ patient_info: state.patientInfo, answers: state.answers })
-      });
-      const { fitness, diet } = await resp.json();
-      if (fitness) state.fitnessReport = fitness;
-      if (diet) state.dietReport = diet;
-    } catch (e) {
-      console.warn("Refinement failed, using original reports:", e);
-    }
-  }
-
+function finalizeAndPrint() {
   buildPrintView();
   document.getElementById("workspace").classList.remove("active");
   document.getElementById("printview").classList.add("active");
 }
 
 function buildPrintView() {
-  const p = state.patientInfo;
-  document.getElementById("printPatientChip").textContent = p.name ? `${p.name} · ${p.gender || ""} · ${p.age || ""}` : "Anonymous Patient";
+  document.getElementById("printPatientChip").textContent = state.files.length ? state.files[0].name : "Anonymous Patient";
 
   const fBody = document.getElementById("printFitnessBody");
   const dBody = document.getElementById("printDietBody");
-  const f = state.fitnessReport;
-  const d = state.dietReport;
 
-  fBody.innerHTML = f ? `
-    <p>${f.summary || ""}</p>
-    <h4>Recommended Activities</h4>
-    <ul>${(f.activities || []).map(a => `<li>${a}</li>`).join("")}</ul>
-    <h4>Precautions</h4>
-    <ul>${(f.precautions || []).map(a => `<li>${a}</li>`).join("")}</ul>
-    ${Object.keys(state.answers).length ? `<h4>Doctor's Notes (from Q&amp;A)</h4><ul>${
-      state.questions.map(q => state.answers[q.id] ? `<li>${q.text}: <strong>${state.answers[q.id]}</strong></li>` : "").join("")
-    }</ul>` : ""}
-  ` : "<p>No fitness report generated.</p>";
-
-  dBody.innerHTML = d ? `
-    <p>${d.summary || ""}</p>
-    <h4>Recommended Foods</h4>
-    <ul>${(d.recommended || []).map(a => `<li>${a}</li>`).join("")}</ul>
-    <h4>Foods to Avoid</h4>
-    <ul>${(d.avoid || []).map(a => `<li>${a}</li>`).join("")}</ul>
-    ${d.meal_plan ? `<h4>Sample Meal Plan</h4><ul>${d.meal_plan.map(a => `<li>${a}</li>`).join("")}</ul>` : ""}
-  ` : "<p>No diet report generated.</p>";
+  if (state.finalReport) {
+    fBody.innerHTML = `<div class="report-section">${marked.parse(state.finalReport.fitness || "No fitness data.")}</div>`;
+    dBody.innerHTML = `<div class="report-section">${marked.parse(state.finalReport.diet || "No diet data.")}</div>`;
+  } else {
+    fBody.innerHTML = "<p>No report generated.</p>";
+    dBody.innerHTML = "<p>No report generated.</p>";
+  }
 }
 
 function backToWorkspace() {
@@ -989,6 +935,31 @@ function showToast(msg, duration = 3000) {
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), duration);
+}
+
+function renderPatientInfo(info) {
+  const container = document.getElementById("patientInfoRows");
+  if (!info) return;
+  
+  container.innerHTML = "";
+  container.classList.remove("info-empty");
+  
+  const fields = [
+    { label: "Name", val: info.name },
+    { label: "Age", val: info.age },
+    { label: "Gender", val: info.gender },
+    { label: "Conditions", val: info.conditions?.join(", ") },
+    { label: "Medications", val: info.medications?.join(", ") }
+  ];
+  
+  fields.forEach(f => {
+    if (f.val) {
+      const row = document.createElement("div");
+      row.className = "info-row";
+      row.innerHTML = `<span class="info-label">${f.label}:</span> <span class="info-val">${f.val}</span>`;
+      container.appendChild(row);
+    }
+  });
 }
 
 /* ─────────────────────────────────────────

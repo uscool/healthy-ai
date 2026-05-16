@@ -498,9 +498,13 @@ JSON array:"""
             print(f"  Gemini findings extraction failed: {e}")
         return self._heuristic_findings(report_text)
 
-    def evaluate_and_ask(self, report_text: str, findings: list[str], patient_notes: str) -> str:
+    def evaluate_and_ask(self, report_text: str, findings: list[str], patient_notes: str, knowledge_hits: list[dict] = None) -> str:
         findings_block = "\n".join(f"- {f}" for f in findings)
+        context = self._build_context(knowledge_hits) if knowledge_hits else "None"
         prompt = f"""You are a medical, dietary, and fitness analyst. You need to diagnose the patient and create the most comprehensive, personalized diet and fitness plan possible.
+Review the patient's report, initial findings, the conversation history, and the medical Knowledge Base context.
+
+Use the Knowledge Base to inform your diagnostic logic. Ensure your questions are grounded in confirming or ruling out conditions or symptoms based on this medical data.
 Review the patient's report, initial findings, and the conversation history.
 
 To produce a high-quality fitness and dietary report, you MUST know:
@@ -512,7 +516,16 @@ To produce a high-quality fitness and dietary report, you MUST know:
 
 Determine if you have ALL of this information. 
 If you DO have comprehensive information across all these areas, reply EXACTLY with: [READY]
-If you NEED more information, reply with 2 to 3 clear, probing questions to ask the patient to fill in the missing gaps. Focus on dietary and fitness aspects.
+If you NEED more information, reply with EXACTLY 1 simple, clear question. 
+
+Each question MUST be multiple choice with exactly 4 simple options. Format each question EXACTLY like this:
+1. [Your simple question text here?]
+   A) [Option 1]
+   B) [Option 2]
+   C) [Option 3]
+   D) [Option 4]
+
+Do not include any other conversational text. Output ONLY the questions formatted as above.
 
 Patient context / Q&A history: {patient_notes or "None"}
 
@@ -522,12 +535,43 @@ Report (excerpt):
 Initial Findings:
 {findings_block}
 
+Knowledge Base Context (Diagnosis):
+{context}
+
 Your response (either [READY] or your questions):"""
         try:
             return self._gemini_text(prompt)
         except Exception as e:
             print(f"  Gemini evaluation failed: {e}")
             return "[READY]"
+
+    def generate_summary(self, report_text: str, findings: list[str], patient_notes: str, previous_summary: str = "") -> str:
+        findings_block = "\n".join(f"- {f}" for f in findings)
+        prompt = f"""You are a clinical assistant. Create a highly concise Markdown summary of the patient's current diagnosis and findings based on their medical report and the Q&A history.
+
+Do not include a diet or fitness plan.
+At the very end of your summary, add a "General Advice" section with any other information or lifestyle advice you recommend based on the findings.
+
+IMPORTANT: You are updating an existing summary based on new Q&A. Retain the original formatting and general structure as much as possible. Only append or gently modify the diagnosis and advice based on new Q&A if absolutely necessary. Do not rewrite everything from scratch heavily.
+
+Previous Summary:
+{previous_summary or "None"}
+
+Report (excerpt):
+{report_text[:12000]}
+
+Findings:
+{findings_block}
+
+Q&A History:
+{patient_notes or "None"}
+
+Updated Summary:"""
+        try:
+            return self._gemini_text(prompt)
+        except Exception as e:
+            print(f"  Gemini summary generation failed: {e}")
+            return "Could not generate summary."
 
     def plan_rag_queries(self, findings: list[str], patient_notes: str = "") -> list[str]:
         findings_block = "\n".join(f"- {f}" for f in findings) or "- general heart-healthy nutrition"
@@ -564,23 +608,22 @@ JSON array of search strings:"""
 Use the PATIENT REPORT for clinical context and the KNOWLEDGE BASE for diet/lifestyle recommendations only.
 Do not invent facts not supported by the inputs.
 
-Produce a structured response with these sections:
-
-## Diagnosis
-Provide a diagnosis of the patient's condition based on the report findings, patient context, and knowledge base.
-
-## General advice
-Practical lifestyle and monitoring guidance tied to the report and knowledge base.
-
-## Diet plan
-Structured plan: daily pattern, foods to emphasize, foods to limit, portions, hydration.
-Align with knowledge base content when available.
-
-## Fitness plan
-Structured exercise and fitness plan tailored to the patient's condition and goals.
-
-## Important
-State what requires clinician follow-up. End with: {MEDICAL_DISCLAIMER}
+Produce ONLY a highly standardized JSON object. Do not wrap in markdown code blocks. The JSON must exactly match this format:
+{{
+  "patient_info": {{
+    "name": "Patient Name or Anonymous",
+    "age": "Age or Unknown",
+    "gender": "Gender or Unknown",
+    "blood_type": "Blood Type or Unknown",
+    "conditions": ["List of main conditions"],
+    "medications": ["List of main medications"]
+  }},
+  "summary": "Clear, concise diagnosis and summary of the patient's condition based on the report findings...",
+  "general_advice": "Practical lifestyle and monitoring guidance...",
+  "diet": "Structured 7-day weekly meal plan. FOR EACH DAY (Day 1-7), you MUST create three distinct, bolded sections: **Breakfast**, **Lunch**, and **Dinner**. For each section, provide 2 healthy options grounded in the KNOWLEDGE BASE provided below. YOU MUST USE RICH MARKDOWN: Use ### Day X headers and bullet points.",
+  "fitness": "Structured 7-day weekly exercise routine. YOU MUST USE RICH MARKDOWN FORMATTING: Use Markdown Headers (### Day 1), bold text, and bullet points for exercises, sets, reps, and durations.",
+  "important": "What requires clinician follow-up. End with exactly this disclaimer: {MEDICAL_DISCLAIMER}"
+}}
 
 Patient notes / Q&A history: {patient_notes or "None"}
 
@@ -593,7 +636,7 @@ Findings already identified:
 Knowledge base (RAG):
 {context}
 
-Structured care plan:"""
+Standardized Markdown Care Plan:"""
         try:
             return self._gemini_text(prompt)
         except Exception as e:

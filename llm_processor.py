@@ -519,7 +519,7 @@ If you DO have comprehensive information across all these areas, reply EXACTLY w
 If you NEED more information, reply with EXACTLY 1 simple, clear question. 
 
 Each question MUST be multiple choice with exactly 4 simple options. Format each question EXACTLY like this:
-1. [Your simple question text here?]
+1. [Your simple question text here?] [Make sure that question is for doctor perspective eg. "Does patient...."]
    A) [Option 1]
    B) [Option 2]
    C) [Option 3]

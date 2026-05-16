@@ -620,7 +620,7 @@ Produce ONLY a highly standardized JSON object. Do not wrap in markdown code blo
   }},
   "summary": "Clear, concise diagnosis and summary of the patient's condition based on the report findings...",
   "general_advice": "Practical lifestyle and monitoring guidance...",
-  "diet": "Structured 7-day weekly meal plan. FOR EACH DAY (Day 1-7), you MUST create three distinct, bolded sections: **Breakfast**, **Lunch**, and **Dinner**. For each section, provide 2 healthy options grounded in the KNOWLEDGE BASE provided below. YOU MUST USE RICH MARKDOWN: Use ### Day X headers and bullet points.",
+  "diet": "Structured 7-day weekly meal plan. FOR EACH DAY (Day 1-7), you MUST create three distinct sections: **Breakfast**, **Lunch**, and **Dinner**. You MUST use DOUBLE NEWLINES (\\n\\n) between these sections so they appear on new lines. For each meal, provide 2 healthy options grounded in the KNOWLEDGE BASE. USE RICH MARKDOWN: ### Day X headers and bullet points.",
   "fitness": "Structured 7-day weekly exercise routine. YOU MUST USE RICH MARKDOWN FORMATTING: Use Markdown Headers (### Day 1), bold text, and bullet points for exercises, sets, reps, and durations.",
   "important": "What requires clinician follow-up. End with exactly this disclaimer: {MEDICAL_DISCLAIMER}"
 }}

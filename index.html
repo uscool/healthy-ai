@@ -105,10 +105,10 @@
     font-size: 13px;
   }
   .info-card-label { font-family: var(--mono); font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 0.5rem; }
-  .info-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 0.5px solid var(--border); }
+  .info-row { display: flex; flex-direction: column; gap: 2px; padding: 0.65rem 0; border-bottom: 1px solid var(--border); }
   .info-row:last-child { border-bottom: none; }
-  .info-key { color: var(--text-secondary); }
-  .info-val { color: var(--text-primary); font-weight: 600; font-family: var(--mono); font-size: 12px; }
+  .info-key { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .info-val { color: var(--text-primary); font-weight: 600; font-size: 13px; line-height: 1.4; }
   .info-empty { color: var(--text-muted); font-style: italic; font-size: 12px; text-align: center; padding: 1rem 0; }
 
   /* Upload zone */
@@ -299,19 +299,20 @@
   .q-options { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border); }
   .q-opt {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0.5rem 1rem;
-    font-size: 12px;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 12.5px;
+    line-height: 1.4;
     cursor: pointer;
     transition: background 0.15s;
-    border-bottom: 0.5px solid var(--border);
+    border-bottom: 1px solid var(--border);
     color: var(--text-secondary);
   }
+  .q-opt input[type="radio"] { margin-top: 2px; flex-shrink: 0; accent-color: var(--accent-mid); }
   .q-opt:last-child { border-bottom: none; }
   .q-opt:hover { background: rgba(0,0,0,0.03); }
-  .q-opt input[type="radio"] { accent-color: var(--accent-mid); }
-  .q-opt.selected { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .q-opt.selected { background: var(--accent-light); color: var(--accent); font-weight: 600; border-bottom-color: #b8d498; }
 
   .q-empty { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 12px; }
 
@@ -655,6 +656,7 @@
    CONFIG — change to your backend URL
 ───────────────────────────────────────── */
 const API_BASE = "http://localhost:8000/api";   // new Flask backend
+marked.setOptions({ breaks: true, gfm: true });
 
 /* ─────────────────────────────────────────
    STATE
@@ -956,7 +958,7 @@ function renderPatientInfo(info) {
     if (f.val) {
       const row = document.createElement("div");
       row.className = "info-row";
-      row.innerHTML = `<span class="info-label">${f.label}:</span> <span class="info-val">${f.val}</span>`;
+      row.innerHTML = `<span class="info-key">${f.label}</span> <span class="info-val">${f.val}</span>`;
       container.appendChild(row);
     }
   });

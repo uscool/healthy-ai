@@ -1,3 +1,8 @@
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Flask](https://img.shields.io/badge/Flask-2.x-lightgrey)
+![Gemini](https://img.shields.io/badge/LLM-Gemini%202.0-orange)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 # NutritionRAG - Medical Health & Diet Planning System
 
 A healthcare-focused Retrieval-Augmented Generation (RAG) system that processes nutrition and health textbooks to generate personalized diet plans using semantic search and AI.

@@ -7,8 +7,6 @@
 
 A healthcare-focused Retrieval-Augmented Generation (RAG) system that processes nutrition and health textbooks to generate personalized diet plans using semantic search and AI.
 
-<img width="1096" height="683" alt="image" src="https://github.com/user-attachments/assets/bbd925fe-2941-41e5-80a7-5f670233a3b7" />
-
 # Healthy-AI
 
 AI-powered personalized diet and health recommendation system using RAG (Retrieval-Augmented Generation), semantic search, and Gemini 2.0.

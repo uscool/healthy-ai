@@ -6,3 +6,8 @@
 __pycache__
 /diagnosis_vectordb
 /nutrition_vectordb
+health_nutrition_vectordb/
+*.mp4
+*.pptx
+.env
+__pycache__/

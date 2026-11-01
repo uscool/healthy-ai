@@ -11,3 +11,4 @@ health_nutrition_vectordb/
 *.pptx
 .env
 __pycache__/
+!requirements.txt

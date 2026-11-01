@@ -1,4 +1,0 @@
-$d30d53e8-4b9a-42ad-ba7a-820767fce045²þid ÿÿÿÿÿÿÿÿÿ*int6408"chunk_id ÿÿÿÿÿÿÿÿÿ*int6408"content ÿÿÿÿÿÿÿÿÿ*string087	embedding ÿÿÿÿÿÿÿÿÿ*fixed_size_list:float:38408!source ÿÿÿÿÿÿÿÿÿ*string08%chunk_index ÿÿÿÿÿÿÿÿÿ*int6408"user_id ÿÿÿÿÿÿÿÿÿ*string08&document_id ÿÿÿÿÿÿÿÿÿ*string083upload_timestamp ÿÿÿÿÿÿÿÿÿ*timestamp:us:-08'access_level	 ÿÿÿÿÿÿÿÿÿ*string08type
- ÿÿÿÿÿÿÿÿÿ*string08"!
-lance.auto_cleanup.interval20"'
-lance.auto_cleanup.older_than14days

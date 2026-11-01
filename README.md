@@ -3,10 +3,6 @@
 ![Gemini](https://img.shields.io/badge/LLM-Gemini%202.0-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-# NutritionRAG - Medical Health & Diet Planning System
-
-A healthcare-focused Retrieval-Augmented Generation (RAG) system that processes nutrition and health textbooks to generate personalized diet plans using semantic search and AI.
-
 # Healthy-AI
 
 AI-powered personalized diet and health recommendation system using RAG (Retrieval-Augmented Generation), semantic search, and Gemini 2.0.
@@ -21,6 +17,7 @@ AI-powered personalized diet and health recommendation system using RAG (Retriev
 * Personalized AI-generated diet plans
 * Gemini 2.0 powered health insights
 * User-level document privacy and access control
+* Medical report analysis pipeline
 
 ---
 
@@ -203,7 +200,6 @@ Healthy-AI/
 # RoadMap (Future Improvements)
 
 * OCR support for scanned PDFs
-* Medical report analysis
 * Allergy-aware diet generation
 * Fitness recommendation engine
 * Multi-model LLM support (Gemma, Llama)
